@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmacoDeck - Guía Farmacoterapéutica</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header & Nav */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            color: white;
+        }
+
+        /* Container & Grid Layout */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            outline: none;
+            background: var(--bg-card);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Deck View */
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            border-color: var(--accent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .card-category {
+            font-size: 0.75rem;
+            background: #eff6ff;
+            color: var(--accent);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-body {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-footer {
+            margin-top: 1.5rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: var(--radius);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .info-val {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .wiki-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f0f9ff;
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 0.875rem;
+        }
+
+        .wiki-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* File Input Hidden */
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <i data-lucide="pill"></i>
+            <span>FarmacoDeck</span>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                <i data-lucide="upload"></i> Cargar JSON
+            </button>
+
+            <button class="btn btn-primary" onclick="resetToDefault()">
+                <i data-lucide="rotate-ccw"></i> Restaurar
+            </button>
+            <input type="file" id="fileInput" accept=".json" onchange="loadJSON(event)">
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="toolbar">
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar por nombre o indicación..." oninput="filterCards()">
+            </div>
+            <div id="cardCounter" style="font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
+                Cargando...
+            </div>
+        </div>
+
+        <div class="deck-grid" id="deckContainer"></div>
+    </div>
+
+    <!-- Modal Detalle Fármaco -->
+    <div class="modal-overlay" id="cardModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x"></i>
+            </button>
+            
+            <div style="display:flex; align-items:center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span class="card-category" id="modalCategory">---</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="modalPresentation">---</span>
+            </div>
+            <h2 id="modalTitle" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem;">---</h2>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">VÍA DE ADMINISTRACIÓN</span>
+                    <span class="info-val" id="modalRoute">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">POSOLOGÍA / DOSIS</span>
+                    <span class="info-val" id="modalDose">---</span>
+                </div>
+            </div>
+
+            <div class="section-title"><i data-lucide="activity"></i> Farmacocinética y Farmacodinamia</div>
+            <p id="modalPKPD" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">---</p>
+
+            <div class="section-title"><i data-lucide="check-circle-2"></i> Indicaciones</div>
+            <p id="modalIndications" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">---</p>
+
+            <div class="section-title" style="color: var(--danger);"><i data-lucide="alert-octagon"></i> Contraindicaciones</div>
+            <p id="modalContraindications" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">---</p>
+
+            <div class="section-title" style="color: var(--warning);"><i data-lucide="alert-triangle"></i> Reacciones Adversas / Efectos Secundarios</div>
+            <p id="modalAdverse" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">---</p>
+
+            <!-- Wikipedia Section -->
+            <div class="wiki-box">
+                <div class="wiki-title">
+                    <i data-lucide="book-open"></i> Información Adicional (Wikipedia API)
+                </div>
+                <div id="wikiContent" style="color: #334155;">Cargando información...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos Iniciales Extraídos de la Guía Farmacoterapéutica 061 Cantabria[cite: 1]
+        const defaultDrugs = [
+            {
+                id: "aas",
+                name: "Ácido Acetilsalicílico",
+                category: "Antiagregante / AINE",
+                presentation: "Aspirina 500mg, Inyesprín 900mg",
+                route: "Oral / Intravenosa",
+                dose: "200-300 mg v.o. dosis única en SCA",
+                pk_pd: "Analgésico, antipirético, AINE y antiagregante. Biodisponibilidad oral >80%. T1/2: 2-3h.",
+                indications: "Sospecha de Síndrome Coronario Agudo (SCA)",
+                contraindications: "Úlcera gastrointestinal activa, hipersensibilidad a la aspirina, hipoprothrombinemia",
+                adverse_effects: "Urticaria, broncoespasmo, dispepsia, sangrado gástrico, rinitis",
+                wiki_query: "Ácido_acetilsalicílico"
+            },
+            {
+                id: "adenosina",
+                name: "Adenosina",
+                category: "Antiarrítmico",
+                presentation: "Viales de 6mg en 2ml",
+                route: "Intravenosa (Bolo rápido en 2 seg)",
+                dose: "Adultos: Bolo 6mg. Repetir 12mg a los 1-2 min si precisa.",
+                pk_pd: "Enlentece la conducción del nódulo AV y de las vías de reentrada. Inicio: inmediato. Duración: <10 seg.",
+                indications: "TPSV (Taquicardia Paroxística Supraventricular) regular de complejo estrecho y en Sd. WPW.",
+                contraindications: "Bloqueo AV 2º y 3er grado, enfermedad del seno, asma bronquial, IC descompensada, IAM agudo.",
+                adverse_effects: "Rubefacción, disnea, presión torácica, mareos, náuseas, asistolia transitoria de 3-6s.",
+                wiki_query: "Adenosina"
+            },
+            {
+                id: "adrenalina",
+                name: "Adrenalina / Epinefrina",
+                category: "Simpaticomimético",
+                presentation: "Ampollas 1mg en 1ml (1/1000)",
+                route: "IV / IM / SC / ET / Nebulizada",
+                dose: "PCR: 1 mg IV c/ 3-5 min. Anafilaxia: 0.5 mg IM.",
+                pk_pd: "Agonista alpha y beta adrenérgico. Vasoconstricción, inotrópico y cronotrópico positivo, broncodilatador. Inicio IV: 3-6s.",
+                indications: "RCP (Asistolia, AESP, FV/TV sin pulso), Broncoespasmo, Anafilaxia, Shock Anafiláctico.",
+                contraindications: "Insuficiencia coronaria, miocardiopatía dilatada, glaucoma de ángulo estrecho.",
+                adverse_effects: "Vasoconstricción periférica, HTA, arritmias, ansiedad, cefalea, edema pulmonar.",
+                wiki_query: "Epinefrina"
+            },
+            {
+                id: "amiodarona",
+                name: "Amiodarona",
+                category: "Antiarrítmico Clase III",
+                presentation: "Ampollas 150mg en 3ml",
+                route: "Intravenosa",
+                dose: "PCR: Bolo 300mg IV. Taquicardias: 5mg/kg en perfusión.",
+                pk_pd: "Bloqueante de receptores alpha y beta. Disminuye automatismo y conducción AV. T1/2: 3.2 - 80 horas.",
+                indications: "FV/TV sin pulso refractaria, taquicardias de complejo ancho/estrecho sintomáticas.",
+                contraindications: "Alergia al yodo, bloqueo AV 2º o 3er grado, bradicardia sinusal, shock o hipotensión severa.",
+                adverse_effects: "Hipotensión, bradicardia, broncoespasmo, flebitis local, torsades de pointes.",
+                wiki_query: "Amiodarona"
+            },
+            {
+                id: "atropina",
+                name: "Atropina",
+                category: "Parasimpaticolítico",
+                presentation: "Ampollas 1mg en 1ml",
+                route: "IV / IM / ET",
+                dose: "Bradicardia: 0.5 - 1 mg IV c/3-5 min (Máx 3mg). Organofosforados: 1-2 mg c/5-10 min.",
+                pk_pd: "Parasimpaticolítico. Aumenta la automatismo del nodo sinusal y la conducción AV. Antiespasmolítico.",
+                indications: "Bradicardia sintomática, asistolia, AESP, intoxicación por organofosforados.",
+                contraindications: "Glaucoma de ángulo estrecho, hiperplasia prostática, íleo paralítico (relativas en urgencias).",
+                adverse_effects: "Sequedad de boca, visión borrosa, midriasis, retención urinaria, taquicardia.",
+                wiki_query: "Atropina"
+            }
+        ];
+
+        let drugs = [];
+
+        // Inicialización
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDeckData();
+            lucide.createIcons();
+        });
+
+        function loadDeckData() {
+            const stored = localStorage.getItem("farmaco_cards");
+            if (stored) {
+                try {
+                    drugs = JSON.parse(stored);
+                } catch(e) {
+                    drugs = [...defaultDrugs];
+                }
+            } else {
+                drugs = [...defaultDrugs];
+                saveToLocalStorage();
+            }
+            renderDeck(drugs);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem("farmaco_cards", JSON.stringify(drugs));
+        }
+
+        function resetToDefault() {
+            if(confirm("¿Deseas restaurar la lista por defecto del 061 Cantabria?")) {
+                drugs = [...defaultDrugs];
+                saveToLocalStorage();
+                renderDeck(drugs);
+            }
+        }
+
+        function renderDeck(data) {
+            const container = document.getElementById("deckContainer");
+            const counter = document.getElementById("cardCounter");
+            container.innerHTML = "";
+
+            counter.innerText = `${data.length} Tarjetas disponibles`;
+
+            data.forEach(drug => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.onclick = () => openModal(drug);
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <div class="card-title">${drug.name}</div>
+                            <span class="card-category">${drug.category}</span>
+                        </div>
+                        <div class="card-body">
+                            <div><strong>Vía:</strong> ${drug.route}</div>
+                            <div><strong>Dosis:</strong> ${drug.dose}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span><i data-lucide="info" style="width:14px; height:14px; vertical-align:middle;"></i> Ver Detalles</span>
+                        <span>061 CANTABRIA</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function filterCards() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            const filtered = drugs.filter(d => 
+                d.name.toLowerCase().includes(query) || 
+                d.indications.toLowerCase().includes(query) ||
+                d.category.toLowerCase().includes(query)
+            );
+            renderDeck(filtered);
+        }
+
+        /* Manejo de Modal */
+        function openModal(drug) {
+            document.getElementById("modalTitle").innerText = drug.name;
+            document.getElementById("modalCategory").innerText = drug.category;
+            document.getElementById("modalPresentation").innerText = drug.presentation || 'N/A';
+            document.getElementById("modalRoute").innerText = drug.route;
+            document.getElementById("modalDose").innerText = drug.dose;
+            document.getElementById("modalPKPD").innerText = drug.pk_pd || 'No especificada.';
+            document.getElementById("modalIndications").innerText = drug.indications;
+            document.getElementById("modalContraindications").innerText = drug.contraindications;
+            document.getElementById("modalAdverse").innerText = drug.adverse_effects;
+
+            document.getElementById("cardModal").classList.add("active");
+
+            // Wikipedia API Call
+            fetchWikipediaInfo(drug.wiki_query || drug.name);
+        }
+
+        function closeModal() {
+            document.getElementById("cardModal").classList.remove("active");
+        }
+
+        /* API Wikipedia */
+        async function fetchWikipediaInfo(term) {
+            const wikiContainer = document.getElementById("wikiContent");
+            wikiContainer.innerHTML = "Cargando extracto desde Wikipedia...";
+
+            const endpoint = `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`;
+
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) throw new Error("No encontrado");
+                const data = await response.json();
+
+                if (data.extract) {
+                    wikiContainer.innerHTML = `
+                        <p>${data.extract}</p>
+                        <a href="${data.content_urls.desktop.page}" target="_blank" style="color: var(--accent); font-weight:600; text-decoration:none; display:inline-block; margin-top:0.5rem;">Leer artículo completo en Wikipedia &rarr;</a>
+                    `;
+                } else {
+                    wikiContainer.innerHTML = "No se encontró resumen adicional en Wikipedia.";
+                }
+            } catch (error) {
+                wikiContainer.innerHTML = "Información adicional de Wikipedia no disponible para este término.";
+            }
+        }
+
+        /* Carga de JSON Personalizado */
+        function loadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedDrugs = JSON.parse(e.target.result);
+                    if (Array.isArray(importedDrugs)) {
+                        drugs = importedDrugs;
+                        saveToLocalStorage();
+                        renderDeck(drugs);
+                        alert("¡Tarjetas importadas con éxito!");
+                    } else {
+                        alert("El archivo JSON debe ser una lista/array de objetos con formato válido.");
+                    }
+                } catch (err) {
+                    alert("Error al leer el archivo JSON: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
